@@ -1,0 +1,19 @@
+The eligibility for CIP Spark can be broken into two categories:
+1. Individual
+(a) Minimum 2 individuals in a team (at least 1 Malaysian).
+(b) Minimum 1 individual residing in Malaysia (Malaysian / Non-Malaysian).
+
+2. Companies such as LLP, Enterprise, and Sdn Bhd
+(a) For < 51% Malaysian owned, majority employees must be Malaysian.
+
+(b) < 5 years of incorporation.
+
+(c) Accumulated revenue < RM3 million.
+• For companies > 18 months from incorporation date, revenue verification is based on   Audited Accounts.
+
+(d) Have IP rights.
+• For Licensed IP:
+- A valid Exclusive Agreement with the applying Sdn Bhd as the licensee
+- Annual renewable Licensing term (during funding period)
+(e) No other companies hold 25% or more.
+(f) No paid-up capital requirement.

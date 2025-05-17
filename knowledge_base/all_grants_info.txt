@@ -1,0 +1,12 @@
+These are all the available grants and corresponding introduction:
+1. MSME Digital Grant: a grant that can reimburse the purchase of digital solutions such as:
+- Digital marketing/sales
+- Digital payment/e-POS System
+- HR Payroll System/Customer Relationship Management (CRM)
+- Enterprise Resource Planning (ERP)/Accounting & Tax
+- Digital Signature
+- IoT/Intelligent System
+- Cyber Security
+2. CIP Spark: a grant that covers the development and pre commercialization of for technology start-ups.
+3. Industry4WRD Intervention Fund: a grant for Malaysian SMEs in the manufacturing and related services sectors to embrace Industry 4.0.
+4. Program Geran Pemadanan Change Upgrade Product (CUP): a grant aims to assist SME entrepreneurs by providing funding (on a matching grant basis) to enhance production, marketability, and product sales.

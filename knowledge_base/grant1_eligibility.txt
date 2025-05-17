@@ -1,0 +1,6 @@
+The eligibility for MSME Digital Grant is as follows:
+- Malaysian-Owned: MSMEs/Cooperatives must be at least 60% owned by Malaysian citizens.
+- Registration Requirements: Must be registered with the Companies Commission of Malaysia (SSM)/Local Authorities (PBT) or Malaysia Co-operative Societies Commission (SKM).
+- Operating Duration: The business should be operating for at least six months.
+- Annual Turnover: Must have an annual turnover of an average of at least RM50,000.
+- Previous Grants: MSMEs/Cooperatives must not have received previous Digitalisation Matching Grants.
