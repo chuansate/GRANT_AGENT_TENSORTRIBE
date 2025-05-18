@@ -11,9 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 from threading import Thread
 from fastapi.responses import StreamingResponse
-import sys, chromadb
+import sys, chromadb, ollama
 import os
 from pydantic import BaseModel
+from typing import Dict, List, Optional
 import json
 load_dotenv()
 MAX_TURNS = 5
@@ -378,3 +379,171 @@ async def add_business_sector(data: BusinessSectorRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error, try again."
         )
+    
+class GrantFormRequest(BaseModel):
+    name: str
+    email_address: str
+    company_size: str
+    owned_by_Msians_percentage: str
+    registered: str
+    operation_duration: str
+    annual_turnover: str
+    business_sector: str
+
+#agentic AI on form filling
+@app.post("/fill-form/")
+async def fill_form(request: GrantFormRequest):
+    agent = get_grant_agent()
+
+    # constructing data for form filling process
+    form_data = f"""
+    Name: {request.name}
+    Email: {request.email_address}
+    Company Size: {request.company_size}
+    Malaysian Shareholder Percentage: {request.owned_by_Msians_percentage}
+    Registered: {request.registered}
+    Operation Duration: {request.operation_duration}
+    Annual Turnover: {request.annual_turnover}
+    Business Sector: {request.business_sector}
+    """
+
+    result = agent.run(f"Use this user info to fill ther grant application {form_data}")
+    return {"result": result}
+
+
+class GrantFormRequest(BaseModel):
+    pass  # You can add fields if needed later
+# ROI Calculator - Grant Category List
+@app.post("/category-list/")
+async def category_list(request: GrantFormRequest):
+    grantCategory = [
+        "Travel & Accommodation",
+        "Event / Trade Show",
+        "Marketing & Promotion",
+        "Tech / Digitalization",
+        "Training & Development",
+        "Certification & Compliance"
+    ]
+    return {
+        "categories": grantCategory
+    }
+
+
+class ExpenseRequest(BaseModel):
+    grantCategory: str
+
+class ExpenseResponse(BaseModel):
+    expenses: list[str]
+
+# get user expenses
+@app.post("/get-expenses/", response_model=ExpenseResponse)
+async def get_expenses(request: ExpenseRequest):
+    grantCategory = request.grantCategory
+
+    try:
+        client = OpenAI(
+            api_key=os.getenv("MODELSTUDIO_API_KEY"),
+            base_url="https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation "
+        )
+
+        system_prompt = "You are an expert assistant helping SMEs apply for grants. Based on the grant category provided, list out 3 typical business expenses they might incur."
+        user_prompt = f"Based on the grant category '{grantCategory}', what are the typical business expenses SMEs incur? Return them as a numbered list."
+
+        completion = client.chat.completions.create(
+            model="qwen-plus",  
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.3,
+            max_tokens=512
+        )
+
+        # Extract LLM output
+        raw_response = completion.choices[0].message.content.strip()
+
+        # Convert to list
+        expenses = [line.split('. ', 1)[1] for line in raw_response.split('\n') if '. ' in line]
+
+        return {"expenses": expenses}
+
+    except Exception as e:
+        print(f"Error fetching expenses: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve expense items")
+    
+
+# Request Model
+class ROICalculationRequest(BaseModel):
+    category: str
+    expenses: Dict[str, float]  # e.g., {"Flight tickets": 2000, "Venue rental": 3500}
+
+# Response Model
+class ROICalculationResponse(BaseModel):
+    grantName: str
+    claimable_amount: float
+    estimated_eligibility: str
+    roi_percentage: float
+    focus_area: str
+    status: str
+
+GRANT_AVERAGE_AMOUNTS = {
+    "Travel & Accommodation": 5000,
+    "Event / Trade Show": 8000,
+    "Marketing & Promotion": 6000,
+    "Tech / Digitalization": 10000,
+    "Training & Development": 4000,
+    "Certification & Compliance": 3000
+}
+
+@app.post("/calculate-roi/", response_model=ROICalculationResponse)
+async def calculate_roi(request: ROICalculationRequest):
+    grantCategory = request.grantCategory
+    user_expenses = request.expenses
+
+    # Get total expenses
+    total_expenses = sum(user_expenses.values())
+
+    queryembed = ollama.embed(model="nomic-embed-text", input=query)['embeddings']
+    relateddocs = '\n\n'.join(collection.query(query_embeddings=queryembed, n_results=8)['documents'][0])
+
+    # Basic ROI formula: (Grant Value / Expense) * 100
+    roi_percentage = round((estimated_grant_amount / total_expenses) * 100, 2)
+
+    # Get estimated grant amount based on category
+    estimated_grant_amount = roi_percentage*
+    # if not estimated_grant_amount:
+    #     raise HTTPException(status_code=400, detail="Invalid grant category")
+
+    # Optional: Use Qwen to explain result
+    explanation = None
+    try:
+        client = OpenAI(
+            api_key=os.getenv("MODELSTUDIO_API_KEY"),
+            base_url="https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation "
+        )
+
+        #prompt = f"Explain the ROI result for an SME that spent ${total_expenses} under '{category}' and received an estimated grant of ${estimated_grant_amount}. Keep it concise and professional."
+        prompt = f"Calculate the ROI percentage "
+
+        completion = client.chat.completions.create(
+            model="qwen-max",
+            messages=[{"role": "system", "content": "You are a financial advisor helping SMEs understand ROI from grants."}, 
+                      {"role": "user", "content": prompt}],
+            max_tokens=150
+        )
+        explanation = completion.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Qwen explanation error: {e}")
+        explanation = "Could not generate explanation at this time."
+
+    return {
+        # "category": category,
+        # "total_expenses": total_expenses,
+        # "explanation": explanation,
+        "grantName": grantName,
+        "claimable_amount": estimated_grant_amount,
+        "estimated_eligibility": estimated_eligibility,
+        "roi_percentage": roi_percentage,
+        "focus_area": focus_area,
+        "status": status
+    }

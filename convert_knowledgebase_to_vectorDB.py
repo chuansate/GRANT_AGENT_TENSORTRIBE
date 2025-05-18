@@ -18,6 +18,23 @@ chromaclient = chromadb.HttpClient(host="localhost", port=8000)
 textdocspath = "./knowledge_base"
 text_data = readtextfiles(textdocspath)
 all_docs = []
+for n, k in text_data.items():
+    print(n)
+exit()
+metadatas = [
+    {"grant_name": None},
+    {"grant_name": "Industry4WRD Intervention Fund"},
+    {"grant_name": "Program Geran Pemadanan Change Upgrade Product (CUP)"},
+    {"grant_name": "Program Geran Pemadanan Change Upgrade Product (CUP)"},
+    {"grant_name": "MSME Digital Grant"},
+    {"grant_name": "CIP Spark"},
+    {"grant_name": ""},
+    {"grant_name": ""},
+    {"grant_name": ""},
+    {"grant_name": ""},
+    {"grant_name": ""}
+
+]
 for doc in text_data.values():
     all_docs.append(doc)
 
@@ -75,6 +92,7 @@ ids = [str(uuid.uuid4()) for _ in embs_flattened]
 collection.add(
     ids=ids,
     documents=all_docs,
-    embeddings=embs_flattened
+    embeddings=embs_flattened,
+    metadatas=metadatas
 )
 print(f"Saved embeddings into collection `{COLLECTION_NAME}`")

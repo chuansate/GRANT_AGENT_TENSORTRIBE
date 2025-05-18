@@ -1,7 +1,10 @@
 import os
 import re
 import ollama
-
+from langchain.agents import initialize_agent, Tool
+from langchain_community.chat_models import ChatQwen
+from langchain.agents.agent_types import AgentType
+from langchain.tools import tool
 
 def readtextfiles(path):
     """
@@ -57,3 +60,31 @@ def chunksplitter(text, chunk_size=300):
 def getembedding(chunks):
     embeds = ollama.embed(model="nomic-embed-text", input=chunks)
     return embeds.get('embeddings', [])
+
+@tool
+def fill_grant_form(data: str) -> str:
+    """Fills out a grant form based on used data and returns a summary."""
+    return f"Filled grant form with data: {data}"
+
+def embed_query(query: str):
+    return ollama.embed(model="nomic-embed-text", input=query)['embeddings']
+
+def get_grant_agent():
+    llm = ChatQwen(model="qwen-plus", temperature=0)
+
+    # wrap the form filler function in a tool
+    tools = [
+        Tool(
+            name="fill_grant_form",
+            func=fill_grant_form,
+            description="Fills a grant form based on user provided information."
+        )
+    ]
+    agent = initialize_agent(
+        tools=tools,
+        llm=llm,
+        agent=AgentType.OPENAI_FUNCTIONS,
+        verbose=True,
+    )
+
+    return agent
